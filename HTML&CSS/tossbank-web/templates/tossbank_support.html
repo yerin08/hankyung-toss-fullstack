@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>토스뱅크 | 고객센터</title>
+    <style>
+        /* 1. 기본 초기화 및 전체 구조 잡기 */
+        * {
+            box-sizing: border-box; 
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f5f5f5; /* 배경색을 살짝 주어 컨테이너들을 돋보이게 함 */
+            display: flex;
+            flex-direction: column; /* 세 개의 큰 컨테이너를 종방향(세로)으로 배치 */
+            min-height: 100vh;      /* 화면 전체 높이를 차지하게 함 */
+            gap: 15px;              /* 컨테이너 사이의 간격 */
+        }
+
+        /* 2. 공통 컨테이너 스타일 (중복 코드 제거용) */
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0px 40px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 1300px; /* 너무 넓어지지 않게 제한 */
+            margin: 0 auto;    /* 중앙 정렬 */
+            border-radius: 20px;
+        }
+
+        /* 3. 헤더 영역 */
+        .header-container {
+            height: 92px;
+            margin-top: 10px;
+            padding-left: 60px;
+            padding-right: 80px;
+        }
+
+        .logo img {
+            height: 95px;
+            width: auto;
+            display: block;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-menu li a {
+            text-decoration: none;
+            color: #454545;
+            font-weight: 500;
+        }
+
+        .nav-menu li a:hover {
+            color: #3498db;
+        }
+
+        .nav-menu a[href="/support"] {
+            color: #0064FF;
+        }
+
+        /* 4. 메인 영역 (flex-grow를 주어 남은 공간을 차지하게 함) */
+        .main-container {
+            display: flex;
+            align-items: center; 
+            gap: 25px;
+            padding: 20px;
+            min-height: 667px;
+        }
+
+        .main {
+            position: relative;
+            width: 650px;
+            height: 630px;
+        }
+
+        .main img{
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1.5px solid #E4E4E4;
+        }
+
+        .aside {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            height: 630px;
+            border-radius: 12px;
+            border: 1.5px solid #E4E4E4;
+        }
+
+        .aside h2 {
+            position: absolute;
+            top: 7%;
+            left: 5%;
+            color: #555F6E;
+            font-size: 25px;
+            font-weight: 600;
+            letter-spacing: -1px;
+        }
+
+        .aside img {
+            position: absolute;
+            top: 16%;
+            left: 5%;
+            height: 78%;
+            width: 92%;
+            border-radius: 12px;
+        }
+
+        /* 5. 푸터 영역 */
+        .footer-container {
+            height: auto; /* 내용에 따라 조절되도록 */
+            padding: 40px;
+            gap: 40px;
+            align-items: flex-start; /* 푸터 내용은 위쪽 정렬이 보기 좋음 */
+            margin-bottom: 10px;
+        }
+
+        .address, .as_center {
+            line-height: 1.6;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .address strong, .as_center strong {
+            display: inline-block;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-container container">
+        <div class="logo">
+            <a href="/">
+                <img src="/static/TossBank_Logo_Primary.png" alt="서비스 로고">
+            </a>
+        </div> 
+        <nav>
+            <ul class="nav-menu">
+                <li><a href="/">홈</a></li>
+                <li><a href="/about">토스뱅크 소개</a></li>
+                <li><a href="/products">상품</a></li>
+                <li><a href="/loan">대출</a></li>
+                <li><a href="/support">고객센터</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-container container">
+        <article class="main">
+            <img src="/static/tb_support1.png" alt="토스뱅크 고객센터 이미지1">
+        </article>
+
+        <aside class="aside">
+            <h2>전화 상담</h2>
+            <img src="/static/tb_support2.png" alt="토스뱅크 고객센터 이미지2">
+        </aside>
+    </main>
+
+    <footer class="footer-container container">
+        <div class="address">
+            <p> <strong>토스뱅크</strong> <br>
+                사업자 등록번호 : 462-86-01671<br>
+                주소 : 06133 서울특별시 강남구 테헤란로 131, 13층<br>
+                대표 : 이은미
+            </p>
+        </div>
+
+        <div class="as_center">
+            <p> <strong>고객센터</strong> <br>
+                전화 : 1661-7654 (24시간 연중무휴)<br>
+                해외전화 : +82-2-6975-9000<br>
+                이메일 : help@tossbank.com
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>
