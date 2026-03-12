@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+    <title>Dev-Log | MBTI Test</title>
+    <script src="/static/mbti-data.js"></script>    
+    <style>
+        /* 대시보드 공용 스타일 */
+        body {
+            background-color: #0F172A;
+            margin: 0; padding: 20px;
+            font-family: 'Pretendard', sans-serif;
+            color: #1E293B;
+        }
+        .dashboard-container {
+            display: grid;
+            grid-template-areas: "header header" "sidebar main";
+            grid-template-columns: 240px 1fr;
+            grid-template-rows: auto 1fr;
+            gap: 25px; max-width: 1300px; margin: 0 auto;
+        }
+        .header { grid-area: header; height: 135px; overflow: hidden; border-radius: 30px; }
+        .header img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 85%;
+            cursor: pointer;
+        }
+
+        .sidebar {
+            grid-area: sidebar; background-color: #ECF6F6; border-radius: 30px;
+            padding: 40px 20px; display: flex; flex-direction: column; gap: 15px;
+            position: sticky; top: 20px; align-self: start; font-family: 'Pixelify Sans', sans-serif;
+        }
+        .menu-item {
+            width: 100%; padding: 15px 20px; border-radius: 15px; cursor: pointer;
+            transition: 0.2s; color: #475569; font-weight: 600; text-decoration: none;
+            box-sizing: border-box; display: flex; align-items: center;
+        }
+        .menu-item.active { background-color: #465052; color: white; font-weight: bold; }
+        .menu-item:hover:not(.active) { background-color: #D1E9E9; }
+
+        /* MBTI 전용 메인 콘텐츠 스타일 */
+        .main-content {
+            grid-area: main; display: flex; flex-direction: column; gap: 25px;
+        }
+
+        .quiz-container { width: 100%; max-width: 800px; margin: 0 auto; }
+        
+        /* 카드 공통 스타일 */
+        .card {
+            background-color: #ECF6F6; border-radius: 30px; padding: 35px;
+            margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .quiz-title { color: #FFFFFF; font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; font-family: 'Pixelify Sans', sans-serif;}
+        .quiz-sub { color: #94A3B8; margin-bottom: 40px; }
+
+        /* 이름 입력 섹션 */
+        .name-section { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+        .name-input {
+            flex: 1; padding: 15px 20px; border: 2px solid #D1E9E9;
+            border-radius: 15px; background: white; font-size: 1rem; outline: none;
+        }
+
+        /* 질문 카드 내부 */
+        .q-number { color: #465052; font-size: 0.9rem; font-weight: 800; margin-bottom: 10px; opacity: 0.7; }
+        .q-text { font-size: 1.3rem; font-weight: 700; line-height: 1.5; margin-bottom: 25px; color: #1E293B; }
+
+        /* 옵션 버튼 */
+        .option-btn {
+            display: block; width: 100%; padding: 20px; margin: 12px 0;
+            border: 2px solid white; border-radius: 18px; background: white;
+            text-align: left; font-size: 1.05rem; font-weight: 600; color: #475569;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .option-btn:hover { border-color: #465052; background: #F8FAFC; }
+        .option-btn.selected { background: #465052; color: white; border-color: #465052; }
+
+        .btn-submit {
+            width: 100%; padding: 25px; background: #10B981;
+            color: white; border: none; border-radius: 20px;
+            font-size: 1.2rem; font-weight: 800; cursor: pointer;
+            transition: 0.3s; margin-top: 20px;
+        }
+        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); }
+
+        /* 결과 화면 */
+        #result-view { display: none; text-align: center; }
+        .result-label { font-size: 1.2rem; color: #94A3B8; margin-bottom: 10px; }
+        .result-type-title { font-size: 3rem; font-weight: 900; color: #1E293B; margin-bottom: 20px; }
+        .result-desc { line-height: 1.8; color: #475569; font-size: 1.1rem; text-align: left; }
+        
+        .stack-badge {
+            background: #465052; color: white; padding: 15px;
+            border-radius: 15px; font-weight: 700; display: inline-block; margin-top: 15px;
+        }
+        .tag-container { display: flex; gap: 10px; justify-content: center; margin-top: 25px; flex-wrap: wrap; }
+        .tag { background: white; padding: 8px 18px; border-radius: 50px; font-weight: 700; color: #465052; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <header class="header">
+        <a href="/" style="display: block; width: 100%; height: 100%; text-decoration: none;">
+            <img src="/static/header.png" alt="Dev-Log Banner">
+        </a>
+    </header>
+
+    <aside class="sidebar">
+        <a href="/" class="menu-item">Home</a>
+        <a href="article" class="menu-item">Article</a>
+        <a href="mbti" class="menu-item active">MBTI</a>
+    </aside>
+
+    <main class="main-content">
+        <div id="quiz-view" class="quiz-container">
+            <h1 class="quiz-title">Developer MBTI</h1>
+            <p class="quiz-sub">당신의 코딩 자아를 찾아보세요.</p>
+            
+            <div class="card name-section">
+                <span style="font-weight: 800; color: #465052;">Dev Name:</span>
+                <input type="text" id="user-name" class="name-input" placeholder="이름을 입력하세요">
+            </div>
+
+            <div id="quiz-list">
+                </div>
+
+            <button class="btn-submit" onclick="showResult()">결과 확인하기 🦖</button>
+        </div>
+
+        <div id="result-view" class="quiz-container">
+            <div class="card">
+                <p id="user-display" class="result-label"></p>
+                <h2 id="result-title" class="result-type-title">유형 이름</h2>
+                
+                <div style="border-top: 2px solid #D1E9E9; padding-top: 30px;">
+                    <h3 style="text-align: left; color: #1E293B;">🔍 당신의 성향은...</h3>
+                    <p id="result-desc" class="result-desc"></p>
+                    
+                    <div style="text-align: left; margin-top: 30px;">
+                        <h3 style="color: #1E293B;">🛠️ 추천 기술 스택</h3>
+                        <div id="result-stack" class="stack-badge"></div>
+                    </div>
+
+                    <div id="result-tags" class="tag-container"></div>
+                </div>
+
+                <button class="btn-submit" style="background: #465052; margin-top: 50px;" onclick="location.reload()">다시 하기</button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const userAnswers = {};
+
+    // 1. 질문 리스트 렌더링
+    function render() {
+        const list = document.getElementById('quiz-list');
+        if (!list) return;
+!
+        list.innerHTML = dev_mbti.map((q, qIdx) => `
+            <div class="card">
+                <div class="q-number">
+                    QUESTION ${String(q.id).padStart(2, '0')}
+                </div>
+                <div class="q-title">
+                    ${q.question}
+                </div>
+                ${q.options.map((opt, oIdx) => `
+                    <button class="option-btn" id="opt-${qIdx}-${oIdx}" onclick="select(${qIdx}, '${opt.type}', ${oIdx})">
+                        ${opt.text}
+                    </button>
+                `).join('')}
+            </div>
+        `).join('');
+    }
+
+    // 2. 답변 선택 처리
+    function select(qIdx, type, oIdx) {
+        // 해당 질문의 모든 버튼에서 selected 클래스 제거
+        document.querySelectorAll(`[id^="opt-${qIdx}-"]`).forEach(b => b.classList.remove('selected'));
+        // 클릭한 버튼에만 selected 클래스 추가
+        document.getElementById(`opt-${qIdx}-${oIdx}`).classList.add('selected');
+        
+        userAnswers[qIdx] = type;
+    }
+
+    // 3. 결과 계산 및 화면 전환
+    function showResult() {
+        const name = document.getElementById('user-name').value.trim();
+        
+        if (!name) return alert("성함을 입력해주세요.");
+        if (Object.keys(userAnswers).length < dev_mbti.length) return alert("모든 질문에 답해주세요!");
+
+        const scores = { U: 0, D: 0, S: 0, A: 0, C: 0, F: 0, G: 0, I: 0 };
+        Object.values(userAnswers).forEach(type => {
+            scores[type]++;
+        });
+
+        const resultKey = 
+            (scores.U >= scores.D ? "U" : "D") +
+            (scores.S >= scores.A ? "S" : "A") +
+            (scores.C >= scores.F ? "C" : "F") +
+            (scores.G >= scores.I ? "G" : "I");
+
+        const result = devTypes[resultKey];
+
+        document.getElementById('quiz-view').style.display = 'none';
+        document.getElementById('result-view').style.display = 'block';
+        
+        document.getElementById('user-display').innerText = `${name} 개발자님의 분석 결과`;
+        document.getElementById('result-title').innerText = result.title;
+        document.getElementById('result-desc').innerText = result.description;
+        document.getElementById('result-stack').innerText = `추천 스택: ${result.stack}`;
+        
+        const tagContainer = document.getElementById('result-tags');
+        tagContainer.innerHTML = result.keyword.map(tag => 
+            `<span class="tag">${tag}</span>`
+        ).join('');
+
+        window.scrollTo(0, 0);
+    }
+
+    // 페이지 로드 시 실행
+    window.onload = function() {
+        if (typeof dev_mbti !== 'undefined') {
+            render();
+        }
+    };
+</script>
+
+</body>
+</html>

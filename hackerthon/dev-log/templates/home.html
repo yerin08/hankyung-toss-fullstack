@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+    <title>Dev-Log | Home</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/dashboard-data.js"></script>
+    <style>
+        body {
+          background-color: #0F172A;
+          margin: 0;
+          padding: 20px;
+          font-family: 'Pretendard', sans-serif;
+        }
+
+        .dashboard-container {
+          display: grid;
+          grid-template-areas:
+            "header header"
+            "sidebar main";
+          grid-template-columns: 240px 1fr;
+          grid-template-rows: auto 1fr;
+          gap: 25px;
+          max-width: 1300px;
+          margin: 0 auto;
+        }
+
+        .header {
+          grid-area: header;
+          width: 100%;
+          height: 135px;
+          overflow: hidden;
+          border-radius: 30px;
+        }
+
+        .header img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 85%;
+            cursor: pointer;
+        }
+
+        .sidebar {
+            grid-area: sidebar; background-color: #ECF6F6; border-radius: 30px;
+            padding: 40px 20px; display: flex; flex-direction: column; gap: 15px;
+            position: sticky; top: 20px; align-self: start;
+        }
+        .menu-item {
+            width: 100%; padding: 15px 20px; border-radius: 15px; cursor: pointer;
+            transition: 0.2s; color: #475569; font-weight: 600; text-decoration: none;
+            box-sizing: border-box; display: flex; align-items: center;
+            font-family: 'Pixelify Sans', sans-serif;
+        }
+        .menu-item.active { background-color: #465052; color: white; font-weight: bold; }
+        .menu-item:hover:not(.active) { background-color: #D1E9E9; }
+
+        .main-content {
+          grid-area: main;
+          display: grid;
+          grid-template-rows: auto 1fr;
+          gap: 25px;
+        }
+
+        /* 상단 카드 행 (1:2 비율) */
+        .top-row {
+          display: grid;
+          grid-template-columns: 0.8fr 1.8fr;
+          gap: 25px;
+        }
+
+        /* 하단 차트 행 */
+        .bottom-row {
+          display: flex;
+        }
+
+        /* 공통 카드 스타일 */
+        .card {
+          background-color: #ECF6F6;
+          border-radius: 30px;
+          padding: 30px;
+          min-height: 200px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-weight: bold;
+        }
+
+        .card-small {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 하단 큰 카드 내부 차트 배치 */
+        .chart-card {
+          width: 100%;
+          display: grid;
+          grid-template-columns: 0.8fr 1.2fr;
+          gap: 30px;
+          min-height: 350px;
+        }
+
+        .chart-box {
+          display: flex;
+          position: relative;
+          flex-direction: column;
+          background: #FFFFFF;
+          width: 100%;
+          height: 100%;
+          border-radius: 20px;
+          display: flex;
+          justify-content: center;
+          align-items: start;
+          padding-bottom: 10px;
+        }
+
+        /* 카드 내부 컨테이너 */
+        .achievement-container {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-around;
+          height: 100%;
+          padding: 10px;
+        }
+
+        /* 스트릭 스타일 */
+        .streak-badge {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: #ffffff;
+          padding: 15px 25px;
+          border-radius: 20px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+          width: fit-content;
+        }
+
+        .count {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #191f28;
+            margin: 10px 0;
+        }
+
+        .fire-icon { font-size: 2rem; }
+        .streak-count {
+          font-size: 2.5rem;
+          font-weight: 800;
+          color: #EF4444;
+        }
+        .streak-text {
+          font-size: 1.1rem;
+          color: #475569;
+        }
+
+        /* 프로그레스 바 스타일 */
+        .progress-section {
+          width: 100%;
+        }
+
+        .progress-info {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 10px;
+          font-weight: 600;
+          color: #1E293B;
+        }
+
+        .progress-bar-bg {
+          width: 100%;
+          height: 20px;
+          background: #FFFFFF;
+          border-radius: 10px;
+          overflow: hidden;
+        }
+
+        .progress-bar-fill {
+          width: 80%;
+          height: 100%;
+          background: linear-gradient(90deg, #10B981, #34D399);
+          border-radius: 10px;
+          transition: width 0.5s ease-in-out;
+        }
+
+        .progress-detail {
+          margin-top: 10px;
+          font-size: 0.9rem;
+          color: #64748B;
+          text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+      <header class="header">
+          <a href="/" style="display: block; width: 100%; height: 100%; text-decoration: none;">
+              <img src="/static/header.png" alt="Dev-Log Banner">
+          </a>
+      </header>
+
+      <nav class="sidebar">
+        <a href="/" class="menu-item active">Home</a>
+        <a href="article" class="menu-item">Article</a>
+        <a href="mbti" class="menu-item">MBTI</a>
+      </nav>
+
+      <main class="main-content">
+        <section class="top-row">
+          <div class="card card-small">
+            <div style="color: #6b7684; font-size: 1rem;">이번달 문제풀이 개수</div>
+            <div class="count">12개</div>
+          </div>
+          <div class="card card-large">
+              <div class="achievement-container">
+                <div class="streak-section">
+                  <div class="streak-badge">
+                    <span class="fire-icon">🔥</span>
+                    <span class="streak-count">5</span>
+                    <span class="streak-text">일 연속 학습 중</span>
+                  </div>
+                </div>
+
+                <div class="progress-section">
+                  <div class="progress-info">
+                    <span class="progress-label">이번 주 목표 달성</span>
+                    <span class="progress-percentage">80%</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill"></div>
+                  </div>
+                  <p class="progress-detail">총 10개 중 8개 완료</p>
+                </div>
+              </div>
+            </div>
+        </section>
+
+        <section class="bottom-row">
+          <div class="card chart-card">
+            <div class="doughnut chart-box">
+                <span style="padding: 30px; font-size: 1.3rem; color: #444E4F;">알고리즘별</span>
+                <canvas id="doughnutChart"></canvas>
+            </div>
+            <div class="line chart-box">
+                <span style="position: absolute; padding: 30px; font-size: 1.3rem; color: #444E4F; top: 3%;">월별 문제풀이 비교</span>
+                <canvas id="lineChart" style="position: absolute; bottom: 10%;"></canvas>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+        // 1. 도넛 차트 (Doughnut)
+        const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
+        new Chart(doughnutCtx, {
+            type: 'doughnut',
+            data: {
+                labels: dashBoardData.categoryStudy.labels,
+                datasets: [{
+                    data: dashBoardData.categoryStudy.counts,
+                    backgroundColor: ['#6366F1', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#94A3B8'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                cutout: '65%',
+                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } }
+            }
+        });
+
+        // 2. 라인 차트 (Line)
+        const lineCtx = document.getElementById('lineChart').getContext('2d');
+        new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: dashBoardData.monthlyTrend.months,
+                datasets: [{
+                    label: '월별 문제 풀이 수',
+                    data: dashBoardData.monthlyTrend.counts,
+                    borderColor: '#6366F1',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+
+                    pointBackgroundColor: '#FFFFFF',
+                    pointBorderColor: '#6366F1',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: '#6366F1'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        grid: {
+                            drawBorder: false,
+                            color: '#F2F4F6'
+                        },
+                        ticks: {
+                            color: '#B0B8C1',
+                            font: { size: 12 }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#B0B8C1',
+                            font: { size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
