@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan It — Sign Up</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="auth-page-bg">
+        <div class="auth-card">
+            <div class="auth-logo">Plan It</div>
+            <h2 class="auth-title">회원가입</h2>
+
+            <form id="signup-form">
+                <div class="input-group">
+                    <input type="text" id="userid" name="userid" placeholder="아이디" required />
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" name="password" placeholder="비밀번호" required />
+                </div>
+                <div class="input-group">
+                    <input type="text" id="username" name="username" placeholder="이름" required />
+                </div>
+                <button type="submit" class="btn-signup-submit">가입하기</button>
+            </form>
+
+            <p class="login-link">
+                이미 계정이 있으신가요? <a href="/login">로그인</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userid   = document.getElementById('userid').value;
+            const password = document.getElementById('password').value;
+            const username = document.getElementById('username').value;
+            try {
+                const res    = await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userid, password, username })
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    alert('🎉 ' + result.message);
+                    window.location.href = '/login';
+                } else {
+                    alert('실패: ' + result.message);
+                }
+            } catch (err) {
+                alert('서버와 연결할 수 없습니다.');
+            }
+        });
+    </script>
+</body>
+</html>

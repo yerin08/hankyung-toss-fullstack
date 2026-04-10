@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan It — Calendar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            /* dark bg (matches global) */
+            --bg:        #25242A;
+            --bg2:       #1E1D23;
+            --surface:   #2E2D35;
+
+            /* purple accent */
+            --accent:    #8B7CF8;
+            --accent-mid:#7265E0;
+            --accent-dim:rgba(139,124,248,0.14);
+            --accent-glow:rgba(139,124,248,0.32);
+
+            /* text on dark */
+            --text:      #E8E7F2;
+            --sub:       #8A8999;
+            --muted:     #4E4D60;
+
+            /* calendar main — WHITE */
+            --cal-bg:    #FFFFFF;
+            --cal-cell:  #FAFAFA;
+            --cal-hover: #F4F3FC;
+            --cal-border:rgba(139,124,248,0.12);
+            --cal-line:  rgba(139,124,248,0.08);
+            --text-w:    #1A1928;
+            --sub-w:     #6B6A8A;
+            --muted-w:   #BCBBD0;
+
+            --red:  #F06B6B;
+            --blue: #60A0F8;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        /* ── Layout ── */
+        .cal-layout {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* ── Sidebar  (dark) ── */
+        .cal-sidebar {
+            width: 250px;
+            min-width: 250px;
+            background: var(--bg2);
+            border-right: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            flex-direction: column;
+            padding: 32px 0;
+        }
+
+        .cal-sidebar-inner {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 0 24px;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+        .cal-sidebar-inner::-webkit-scrollbar { display: none; }
+
+        .cal-logo {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.4px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cal-logo-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        .cal-year-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 26px;
+        }
+
+        .cal-year-text {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -1px;
+        }
+
+        .cal-year-btn {
+            width: 30px; height: 30px;
+            border-radius: 8px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--sub);
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            font-family: 'Inter', sans-serif;
+        }
+        .cal-year-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .cal-month-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .cal-month-item {
+            padding: 9px 13px;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--sub);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .cal-month-item:hover {
+            background: rgba(255,255,255,0.04);
+            color: var(--text);
+        }
+        .cal-month-item.active {
+            background: var(--accent-dim);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .cal-sidebar-nav {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .cal-nav-link {
+            padding: 8px 13px;
+            border-radius: 9px;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: var(--sub);
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.15s;
+            font-family: 'Inter', sans-serif;
+        }
+        .cal-nav-link:hover {
+            background: rgba(255,255,255,0.04);
+            color: var(--text);
+        }
+
+        /* ── Main  (WHITE) ── */
+        .cal-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--cal-bg);
+            overflow: hidden;
+        }
+
+        /* Header bar inside white area */
+        .cal-main-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 28px 36px 20px;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--cal-line);
+        }
+
+        .cal-main-month {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: -1.5px;
+            line-height: 1;
+        }
+
+        .cal-main-year-sub {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--muted-w);
+            letter-spacing: 0.5px;
+            margin-left: 10px;
+        }
+
+        /* Day-of-week labels */
+        .cal-dow-row {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            padding: 10px 36px 0;
+            border-bottom: 1px solid var(--cal-line);
+            flex-shrink: 0;
+        }
+
+        .cal-dow-label {
+            text-align: center;
+            font-size: 10.5px;
+            font-weight: 700;
+            color: var(--muted-w);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding-bottom: 10px;
+        }
+        .cal-dow-label:first-child { color: var(--red); }
+        .cal-dow-label:last-child  { color: var(--blue); }
+
+        /* Days grid */
+        .cal-days-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: var(--cal-line);
+            gap: 1px;
+            overflow: hidden;
+            margin: 0 0 0 0;
+            min-height: 0;
+        }
+
+        /* Day cell */
+        .cal-day-cell {
+            background: var(--cal-bg);
+            padding: 10px 12px 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+        .cal-day-cell:hover { background: var(--cal-hover); }
+
+        .cal-day-cell.other-month {
+            background: #F8F7FC;
+            cursor: default;
+            pointer-events: none;
+        }
+        .cal-day-cell.other-month .cal-num-wrap {
+            color: var(--muted-w);
+        }
+
+        .cal-num-wrap {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--sub-w);
+            margin-bottom: 5px;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+        .cal-day-cell:hover .cal-num-wrap { color: var(--text-w); }
+
+        .cal-day-cell.is-today .cal-num-wrap {
+            background: var(--accent);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 0 14px var(--accent-glow);
+        }
+        .cal-day-cell.sunday  .cal-num-wrap { color: var(--red); }
+        .cal-day-cell.saturday .cal-num-wrap { color: var(--blue); }
+        .cal-day-cell.is-today .cal-num-wrap { color: #fff !important; }
+
+        /* Todo tags */
+        .cal-todo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            overflow: hidden;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .cal-todo-tag {
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+            line-height: 1.6;
+            flex-shrink: 0;
+        }
+        .cal-todo-tag.p3  { background: rgba(240,107,107,0.12); color: #D94F4F; }
+        .cal-todo-tag.p2  { background: rgba(255,144,96,0.12);  color: #D4683A; }
+        .cal-todo-tag.p1  { background: rgba(139,124,248,0.12); color: var(--accent-mid); }
+        .cal-todo-tag.done{
+            background: rgba(0,0,0,0.04);
+            color: var(--muted-w);
+            text-decoration: line-through;
+        }
+
+        .cal-more {
+            font-size: 9px;
+            color: var(--muted-w);
+            font-weight: 600;
+            padding: 0 2px;
+            letter-spacing: 0.3px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="cal-layout">
+
+        <!-- ── Sidebar (dark) ── -->
+        <aside class="cal-sidebar">
+            <div class="cal-sidebar-inner">
+                <div class="cal-logo">
+                    <div class="cal-logo-dot"></div>
+                    Plan It
+                </div>
+
+                <div class="cal-year-nav">
+                    <button class="cal-year-btn" id="prev-year-btn">&#8249;</button>
+                    <span class="cal-year-text" id="year-display"></span>
+                    <button class="cal-year-btn" id="next-year-btn">&#8250;</button>
+                </div>
+
+                <div class="cal-month-list" id="month-list"></div>
+
+                <div class="cal-sidebar-nav">
+                    <a href="/todo" class="cal-nav-link">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                        To-do
+                    </a>
+                    <a href="#" class="cal-nav-link" id="logout-link">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── Main (white) ── -->
+        <main class="cal-main">
+            <div class="cal-main-header">
+                <div>
+                    <span class="cal-main-month" id="main-month-name"></span>
+                    <span class="cal-main-year-sub" id="main-year-sub"></span>
+                </div>
+            </div>
+
+            <div class="cal-dow-row">
+                <span class="cal-dow-label">SUN</span>
+                <span class="cal-dow-label">MON</span>
+                <span class="cal-dow-label">TUE</span>
+                <span class="cal-dow-label">WED</span>
+                <span class="cal-dow-label">THU</span>
+                <span class="cal-dow-label">FRI</span>
+                <span class="cal-dow-label">SAT</span>
+            </div>
+
+            <div class="cal-days-grid" id="days-grid"></div>
+        </main>
+
+    </div>
+
+    <script>
+        const MONTHS_EN = [
+            'January','February','March','April','May','June',
+            'July','August','September','October','November','December'
+        ];
+
+        let currentDate = new Date();
+        let allTodos    = [];
+
+        function buildSidebar() {
+            document.getElementById('year-display').textContent = currentDate.getFullYear();
+            const list = document.getElementById('month-list');
+            list.innerHTML = '';
+            MONTHS_EN.forEach((name, idx) => {
+                const item = document.createElement('div');
+                item.className = 'cal-month-item' + (idx === currentDate.getMonth() ? ' active' : '');
+                item.textContent = name;
+                item.addEventListener('click', () => { currentDate.setMonth(idx); renderAll(); });
+                list.appendChild(item);
+            });
+        }
+
+        function renderCalendar() {
+            const year  = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            document.getElementById('main-month-name').textContent = MONTHS_EN[month];
+            document.getElementById('main-year-sub').textContent   = year;
+
+            const firstDay     = new Date(year, month, 1).getDay();
+            const lastDate     = new Date(year, month + 1, 0).getDate();
+            const prevLastDate = new Date(year, month, 0).getDate();
+            const todayStr     = new Date().toISOString().split('T')[0];
+
+            const grid = document.getElementById('days-grid');
+            grid.innerHTML = '';
+
+            const totalCells = Math.ceil((firstDay + lastDate) / 7) * 7;
+            const numRows    = totalCells / 7;
+            grid.style.gridTemplateRows = `repeat(${numRows}, 1fr)`;
+
+            for (let i = firstDay; i > 0; i--)
+                grid.appendChild(makeCell(prevLastDate - i + 1, null, true, false, (firstDay - i) % 7));
+
+            for (let d = 1; d <= lastDate; d++) {
+                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const dow     = new Date(year, month, d).getDay();
+                const tasks   = allTodos.filter(t => t.date === dateStr).sort((a,b) => b.priority - a.priority);
+                grid.appendChild(makeCell(d, dateStr, false, dateStr === todayStr, dow, tasks));
+            }
+
+            const remainder = totalCells - firstDay - lastDate;
+            for (let d = 1; d <= remainder; d++)
+                grid.appendChild(makeCell(d, null, true, false, (firstDay + lastDate + d - 1) % 7));
+        }
+
+        function makeCell(num, dateStr, otherMonth, isToday, dow, tasks = []) {
+            const cell = document.createElement('div');
+            let cls = 'cal-day-cell';
+            if (otherMonth) cls += ' other-month';
+            if (isToday)    cls += ' is-today';
+            if (dow === 0)  cls += ' sunday';
+            if (dow === 6)  cls += ' saturday';
+            cell.className = cls;
+
+            const numEl = document.createElement('div');
+            numEl.className = 'cal-num-wrap';
+            numEl.textContent = num;
+            cell.appendChild(numEl);
+
+            if (tasks.length > 0) {
+                const list = document.createElement('div');
+                list.className = 'cal-todo-list';
+                tasks.slice(0, 3).forEach(t => {
+                    const tag = document.createElement('div');
+                    tag.className = 'cal-todo-tag ' + (t.is_completed ? 'done' : `p${t.priority}`);
+                    tag.textContent = t.title;
+                    tag.title = t.title;
+                    list.appendChild(tag);
+                });
+                if (tasks.length > 3) {
+                    const more = document.createElement('div');
+                    more.className = 'cal-more';
+                    more.textContent = `+${tasks.length - 3} more`;
+                    list.appendChild(more);
+                }
+                cell.appendChild(list);
+            }
+
+            if (!otherMonth && dateStr)
+                cell.addEventListener('click', () => { window.location.href = `/todo?date=${dateStr}`; });
+
+            return cell;
+        }
+
+        function renderAll() { buildSidebar(); renderCalendar(); }
+
+        document.getElementById('prev-year-btn').addEventListener('click', () => {
+            currentDate.setFullYear(currentDate.getFullYear() - 1); renderAll();
+        });
+        document.getElementById('next-year-btn').addEventListener('click', () => {
+            currentDate.setFullYear(currentDate.getFullYear() + 1); renderAll();
+        });
+        document.getElementById('logout-link').addEventListener('click', e => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        });
+
+        async function init() {
+            const token = localStorage.getItem('token');
+            if (!token) { window.location.href = '/login'; return; }
+            try {
+                const res = await fetch('/api/todos', { headers: { 'Authorization': `Bearer ${token}` } });
+                allTodos = await res.json();
+            } catch(e) { console.error(e); }
+            renderAll();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan It</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="start-page-bg">
+        <div class="start-card">
+            <div class="start-badge">
+                <div class="badge-dot"></div>
+                Plan smarter, not harder
+            </div>
+
+            <h1 class="start-title">
+                Plan <span class="highlight">It</span>
+            </h1>
+
+            <p class="start-description">
+                단순한 할 일을 넘어,<br>
+                당신의 하루와 루틴을 완벽하게 관리하세요.
+            </p>
+
+            <div class="button-container">
+                <button onclick="location.href='/login'" class="btn-login">
+                    로그인
+                </button>
+                <button onclick="location.href='/signup'" class="btn-signup">
+                    시작하기 — 무료 가입
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onload = () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                // location.href = '/calendar';
+            }
+        };
+    </script>
+</body>
+</html>
